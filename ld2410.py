@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 """
             LD2410 Driver in python
             =======================
@@ -25,7 +25,9 @@ import random
 
 
 class Thresholds:
-    def __init__(self,moving:list[int|None]|None,static:list[int|None]|None):
+    def __init__(self,
+                moving:list[int|None]|None,
+                static:list[int|None]|None):
         """
                 None or missing parameters indicates no threshold set at this range 
                 Whole lists can be ommitted if no thresholds of that type are required
@@ -133,8 +135,6 @@ class LD2410(Thread):
     REPORTING_PREAMBLE:bytes=list_ints_to_bytes([0xF4,0xF3,0xF2,0xF1])
     REPORTING_POSTAMBLE:bytes=list_ints_to_bytes([0xF8,0xF7,0xF6,0xF5])
 
-    VALID_STATES=["startup","waiting_for_eng_ack","waiting_for_first_report","reporting"]
-
 
 
     def __init__(self,
@@ -162,9 +162,7 @@ class LD2410(Thread):
         self.stopped:bool=True
         self.buffer:deque=deque(maxlen=maxlen)
         self.serial:serial.Serial|None=None
-        self.state:str=""
-        self.state_change_time:datetime=datetime.now()
-        self.change_state("startup")
+
         
         
 
@@ -176,13 +174,6 @@ class LD2410(Thread):
         #logging.debug(f"\t\t>>>> {bytes_to_hex(r)}")
         return r
 
-    def change_state(self,new_state):
-        if new_state not in self.VALID_STATES:
-            raise LD2410Exception(f"Attempt to enter new state: {new_state} that isn't in VALID_STATES")
-
-        logging.debug(f"LD2410 changing state from {self.state} to {new_state}")
-        self.state=new_state
-        self.state_change_time=datetime.now()
 
 
     def _tx_sequence(self,sequence:bytes|list[int]):
